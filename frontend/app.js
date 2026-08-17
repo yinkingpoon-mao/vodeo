@@ -21,7 +21,7 @@ const STATUS_LABEL = {
   extracting_audio: ["抽緊音軌…", 15],
   transcribing: ["轉緊做文字 (Whisper)…", 35],
   analyzing_audio: ["分析緊音量變化…", 55],
-  analyzing_with_ai: ["Claude 分析緊邊段最精華…", 70],
+  picking_highlights: ["揀緊邊段音量最高…", 70],
   cutting_previews: ["剪緊預覽片段…", 85],
   awaiting_review: ["等緊你揀選…", 100],
   rendering: ["合併緊最終精華片…", 100],
@@ -82,7 +82,6 @@ uploadBtn.addEventListener("click", async () => {
 
   const form = new FormData();
   form.append("file", selectedFile);
-  form.append("video_kind", el("video-kind").value);
   form.append("clip_min", parseFloat(el("clip-min").value) * 60);
   form.append("clip_max", parseFloat(el("clip-max").value) * 60);
 

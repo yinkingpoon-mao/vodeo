@@ -81,7 +81,7 @@ def auto_max_highlights(duration: float) -> int:
 MAX_DURATION_SECONDS = float(os.environ.get("MAX_DURATION_SECONDS", 4 * 60 * 60))
 
 
-def run_pipeline(job: Job, video_kind: str, clip_min: float, clip_max: float):
+def run_pipeline(job: Job, clip_min: float, clip_max: float):
     try:
         job_dir = UPLOADS_DIR / job.id
         audio_path = job_dir / "audio.wav"
@@ -102,13 +102,11 @@ def run_pipeline(job: Job, video_kind: str, clip_min: float, clip_max: float):
         job.status = "analyzing_audio"
         peaks = pipeline.find_volume_peaks(audio_path)
 
-        job.status = "analyzing_with_ai"
-        highlights = pipeline.analyze_highlights(
-            api_key=os.environ["ANTHROPIC_API_KEY"],
+        job.status = "picking_highlights"
+        highlights = pipeline.pick_highlights(
             transcript=transcript,
             volume_peaks=peaks,
             duration=job.duration,
-            video_kind=video_kind,
             max_highlights=auto_max_highlights(job.duration),
             clip_seconds=(clip_min, clip_max),
         )
@@ -132,13 +130,9 @@ def run_pipeline(job: Job, video_kind: str, clip_min: float, clip_max: float):
 @app.post("/api/upload")
 def upload(
     file: UploadFile = File(...),
-    video_kind: str = Form("一般影片"),
     clip_min: float = Form(5.0),
     clip_max: float = Form(20.0),
 ):
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise HTTPException(500, "伺服器未設定 ANTHROPIC_API_KEY")
-
     ext = Path(file.filename or "video.mp4").suffix or ".mp4"
     tmp_job = store.create(video_path=Path())
     job_dir = UPLOADS_DIR / tmp_job.id
@@ -152,7 +146,7 @@ def upload(
 
     thread = threading.Thread(
         target=run_pipeline,
-        args=(tmp_job, video_kind, clip_min, clip_max),
+        args=(tmp_job, clip_min, clip_max),
         daemon=True,
     )
     thread.start()

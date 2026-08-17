@@ -4,25 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>剪片精華助手</title>
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div class="wrap">
   <h1>剪片精華助手</h1>
-  <p class="sub">上傳你嘅影片，AI 會分析對白同音量變化，揀出精華片段幫你剪成一條 reel。</p>
+  <p class="sub">上傳你嘅影片，分析對白同音量變化，揀出精華片段幫你剪成一條 reel（完全本機/免費，唔用任何收費 AI）。</p>
 
   <section id="setup-card" class="card">
-    <label class="field">
-      <span>影片類型</span>
-      <select id="video-kind">
-        <option value="遊戲直播/電競">遊戲直播/電競</option>
-        <option value="運動比賽">運動比賽</option>
-        <option value="訪談/講座">訪談/講座</option>
-        <option value="日常Vlog">日常Vlog</option>
-        <option value="一般影片">一般影片</option>
-      </select>
-    </label>
-
     <label class="field">
       <span>每段長度 (分鐘)</span>
       <div class="range-pair">
@@ -51,7 +40,7 @@
 
   <section id="review-card" class="card hidden">
     <h2>揀選精華片段</h2>
-    <p class="hint">AI 揀咗以下片段，你可以睇下再決定要唔要邊段，然後按「合併輸出」。</p>
+    <p class="hint">程式根據音量爆點揀咗以下片段，你可以睇下再決定要唔要邊段，然後按「合併輸出」。</p>
     <div id="clip-list"></div>
     <button id="render-btn">合併輸出精華片</button>
   </section>
@@ -74,6 +63,6 @@
     <button id="error-restart-btn">再試一次</button>
   </section>
 </div>
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
