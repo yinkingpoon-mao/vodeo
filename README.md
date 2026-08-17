@@ -1,6 +1,8 @@
 # 剪片精華助手
 
-網站工具：上傳影片 → Whisper 轉文字 + 音量分析 → 揀出音量最高嘅片段 → ffmpeg 剪片合併。全程本機/免費，唔叫任何收費 AI API。
+網站工具：上傳影片 → Whisper 轉文字 + 音量分析 → 揀出精華片段 → ffmpeg 剪片合併。
+
+有設 `ANTHROPIC_API_KEY` 就用 Claude 理解內容揀精華（質素較好，會收 API 費用）；冇設就自動 fallback 做純音量分析（完全免費，但準確度較低）。
 
 ## 本機開發
 
@@ -8,7 +10,11 @@
    ```bash
    brew install ffmpeg
    ```
-2. 開啟網站:
+2. （選填）想用 Claude 分析就設定 API key（喺 console.anthropic.com/settings/keys 攞）:
+   ```bash
+   export ANTHROPIC_API_KEY=sk-ant-...
+   ```
+3. 開啟網站:
    ```bash
    cd "/Users/yinkingpoon/Desktop/Video"
    source .venv/bin/activate
@@ -23,6 +29,7 @@
    - `SITE_PASSWORD` — 你想用嘅登入密碼（設咗先會要求登入，好重要，唔設就任何人都入得）
    - `SITE_USERNAME` — 登入用戶名（選填，預設 `admin`）
    - `MAX_DURATION_SECONDS` — 建議設 `1200`（20 分鐘），因為免費/入門方案記憶體有限（例如 1GB），太長嘅片會爆記憶體
+   - `ANTHROPIC_API_KEY` — （選填）你嘅 Anthropic key，設咗就會用 Claude 揀精華，唔設就用免費嘅音量分析
 3. 部署完成後，Railway 會俾一個 `*.up.railway.app` 網址，開嗰個網址會彈出瀏覽器原生登入視窗，輸入返上面設嘅用戶名密碼就用得。
 
 ## 注意事項

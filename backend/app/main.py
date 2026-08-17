@@ -110,14 +110,26 @@ def run_pipeline(job: Job):
         job.status = "analyzing_audio"
         peaks = pipeline.find_volume_peaks(audio_path)
 
-        job.status = "picking_highlights"
-        highlights = pipeline.pick_highlights(
-            transcript=transcript,
-            volume_peaks=peaks,
-            duration=job.duration,
-            max_highlights=auto_max_highlights(job.duration),
-            clip_seconds=auto_clip_seconds(job.duration),
-        )
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+        if anthropic_key:
+            job.status = "analyzing_with_ai"
+            highlights = pipeline.analyze_highlights(
+                api_key=anthropic_key,
+                transcript=transcript,
+                volume_peaks=peaks,
+                duration=job.duration,
+                max_highlights=auto_max_highlights(job.duration),
+                clip_seconds=auto_clip_seconds(job.duration),
+            )
+        else:
+            job.status = "picking_highlights"
+            highlights = pipeline.pick_highlights(
+                transcript=transcript,
+                volume_peaks=peaks,
+                duration=job.duration,
+                max_highlights=auto_max_highlights(job.duration),
+                clip_seconds=auto_clip_seconds(job.duration),
+            )
 
         job.status = "cutting_previews"
         candidates_dir = OUTPUTS_DIR / job.id / "candidates"

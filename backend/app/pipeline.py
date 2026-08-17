@@ -149,6 +149,97 @@ def pick_highlights(
     return chosen
 
 
+HIGHLIGHT_TOOL = {
+    "name": "return_highlights",
+    "description": "回傳揀選好嘅精華片段清單",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "highlights": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "start": {"type": "number", "description": "開始時間（秒）"},
+                        "end": {"type": "number", "description": "結束時間（秒）"},
+                        "title": {"type": "string", "description": "簡短標題（十字以內）"},
+                        "reason": {"type": "string", "description": "點解呢段精華"},
+                    },
+                    "required": ["start", "end", "title", "reason"],
+                },
+            }
+        },
+        "required": ["highlights"],
+    },
+}
+
+
+def analyze_highlights(
+    api_key: str,
+    transcript: list[dict],
+    volume_peaks: list[dict],
+    duration: float,
+    max_highlights: int,
+    clip_seconds: tuple[float, float],
+) -> list[dict]:
+    import anthropic
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    transcript_text = "\n".join(
+        f"[{seg['start']}s-{seg['end']}s] {seg['text']}" for seg in transcript
+    ) or "(冇偵測到人聲對白)"
+    peaks_text = "\n".join(
+        f"[{p['time']}s] 音量突增 (level={p['level']})" for p in volume_peaks
+    ) or "(冇明顯音量爆點)"
+
+    prompt = f"""你係一個影片剪輯助手，負責由一條影片入面揀出最精華嘅片段，用嚟剪成一條精華reel。
+
+影片全長: {duration:.1f} 秒
+
+逐句字幕/對白時間軸:
+{transcript_text}
+
+音量突增時間點（可能代表爆發、歡呼、擊殺、緊張時刻）:
+{peaks_text}
+
+要求:
+- 揀出最多 {max_highlights} 段精華片段，每段長度介乎 {clip_seconds[0]:.0f} 至 {clip_seconds[1]:.0f} 秒
+- 段與段之間唔好重疊
+- 揀嘅時候要考慮對白內容嘅精彩程度，同埋音量爆點反映嘅畫面高潮
+- 剪接點盡量對齊句子/動作嘅自然開始同結束，唔好切斷緊要嘅一句說話中途
+- start/end 一定要喺 0 至 {duration:.1f} 秒範圍內
+- 用 return_highlights 呢個 tool 回傳結果，唔好用文字回答"""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=2048,
+        tools=[HIGHLIGHT_TOOL],
+        tool_choice={"type": "tool", "name": "return_highlights"},
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    for block in response.content:
+        if block.type == "tool_use" and block.name == "return_highlights":
+            highlights = block.input.get("highlights", [])
+            cleaned = []
+            for h in highlights:
+                start = max(0.0, min(float(h["start"]), duration))
+                end = max(start, min(float(h["end"]), duration))
+                if end - start < 1:
+                    continue
+                cleaned.append({
+                    "start": round(start, 2),
+                    "end": round(end, 2),
+                    "title": h.get("title", ""),
+                    "reason": h.get("reason", ""),
+                })
+            cleaned.sort(key=lambda h: h["start"])
+            return cleaned
+
+    raise RuntimeError("Claude 冇回傳有效嘅精華清單")
+
+
 def cut_clip(video_path: Path, out_path: Path, start: float, end: float) -> None:
     ffmpeg = get_ffmpeg_path()
     duration = max(0.1, end - start)
