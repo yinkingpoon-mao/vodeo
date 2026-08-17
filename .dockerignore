@@ -1,0 +1,8 @@
+.venv
+uploads
+outputs
+jobs
+__pycache__
+*.pyc
+.git
+.DS_Store

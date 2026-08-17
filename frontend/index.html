@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>剪片精華助手</title>
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+<div class="wrap">
+  <h1>剪片精華助手</h1>
+  <p class="sub">上傳你嘅影片，AI 會分析對白同音量變化，揀出精華片段幫你剪成一條 reel。</p>
+
+  <section id="setup-card" class="card">
+    <label class="field">
+      <span>影片類型</span>
+      <select id="video-kind">
+        <option value="遊戲直播/電競">遊戲直播/電競</option>
+        <option value="運動比賽">運動比賽</option>
+        <option value="訪談/講座">訪談/講座</option>
+        <option value="日常Vlog">日常Vlog</option>
+        <option value="一般影片">一般影片</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>每段長度 (分鐘)</span>
+      <div class="range-pair">
+        <input id="clip-min" type="number" value="0.1" min="0.05" max="1" step="0.05">
+        <span>~</span>
+        <input id="clip-max" type="number" value="0.5" min="0.1" max="2" step="0.05">
+      </div>
+    </label>
+    <p class="hint">精華段數由程式根據片長自動決定，唔使自己揀。</p>
+
+    <label class="field dropzone" id="dropzone">
+      <span id="file-label">揀影片檔案 (或拖拽到呢度)</span>
+      <input id="file-input" type="file" accept="video/*">
+    </label>
+
+    <button id="upload-btn">開始分析</button>
+    <p id="upload-hint" class="hint upload-hint"></p>
+  </section>
+
+  <section id="progress-card" class="card hidden">
+    <h2>處理緊…</h2>
+    <div class="status-line" id="status-line">準備緊…</div>
+    <div class="progress-bar"><div id="progress-fill"></div></div>
+    <p class="hint">第一次用會下載 Whisper 語音模型，可能要幾分鐘，之後會快好多。</p>
+  </section>
+
+  <section id="review-card" class="card hidden">
+    <h2>揀選精華片段</h2>
+    <p class="hint">AI 揀咗以下片段，你可以睇下再決定要唔要邊段，然後按「合併輸出」。</p>
+    <div id="clip-list"></div>
+    <button id="render-btn">合併輸出精華片</button>
+  </section>
+
+  <section id="render-card" class="card hidden">
+    <h2>合併緊…</h2>
+    <div class="status-line" id="render-status">處理緊…</div>
+  </section>
+
+  <section id="done-card" class="card hidden">
+    <h2>完成！</h2>
+    <video id="final-video" controls></video>
+    <a id="download-link" download>下載精華片</a>
+    <button id="restart-btn">再剪一條</button>
+  </section>
+
+  <section id="error-card" class="card hidden">
+    <h2>出錯咗</h2>
+    <div id="error-msg" class="error-msg"></div>
+    <button id="error-restart-btn">再試一次</button>
+  </section>
+</div>
+<script src="app.js?v=4"></script>
+</body>
+</html>
