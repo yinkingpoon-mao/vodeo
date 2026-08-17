@@ -34,7 +34,7 @@ SITE_PASSWORD = os.environ.get("SITE_PASSWORD")
 
 @app.middleware("http")
 async def basic_auth(request: Request, call_next):
-    if not SITE_PASSWORD:
+    if request.url.path == "/health" or not SITE_PASSWORD:
         return await call_next(request)
 
     header = request.headers.get("authorization")
@@ -54,6 +54,11 @@ async def basic_auth(request: Request, call_next):
         headers={"WWW-Authenticate": 'Basic realm="Video Highlights"'},
         content="需要登入",
     )
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 
 
 def job_public_state(job: Job) -> dict:
