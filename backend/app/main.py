@@ -4,7 +4,7 @@ import shutil
 import threading
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -76,12 +76,20 @@ def auto_max_highlights(duration: float) -> int:
     return max(3, min(12, round(duration / 90)))
 
 
+def auto_clip_seconds(duration: float) -> tuple[float, float]:
+    if duration < 180:
+        return (4.0, 8.0)
+    if duration < 900:
+        return (6.0, 12.0)
+    return (8.0, 18.0)
+
+
 # No real cap by default (e.g. local use with plenty of RAM). Constrained
 # hosts like a small Railway plan should set MAX_DURATION_SECONDS explicitly.
 MAX_DURATION_SECONDS = float(os.environ.get("MAX_DURATION_SECONDS", 4 * 60 * 60))
 
 
-def run_pipeline(job: Job, clip_min: float, clip_max: float):
+def run_pipeline(job: Job):
     try:
         job_dir = UPLOADS_DIR / job.id
         audio_path = job_dir / "audio.wav"
@@ -108,7 +116,7 @@ def run_pipeline(job: Job, clip_min: float, clip_max: float):
             volume_peaks=peaks,
             duration=job.duration,
             max_highlights=auto_max_highlights(job.duration),
-            clip_seconds=(clip_min, clip_max),
+            clip_seconds=auto_clip_seconds(job.duration),
         )
 
         job.status = "cutting_previews"
@@ -128,11 +136,7 @@ def run_pipeline(job: Job, clip_min: float, clip_max: float):
 
 
 @app.post("/api/upload")
-def upload(
-    file: UploadFile = File(...),
-    clip_min: float = Form(5.0),
-    clip_max: float = Form(20.0),
-):
+def upload(file: UploadFile = File(...)):
     ext = Path(file.filename or "video.mp4").suffix or ".mp4"
     tmp_job = store.create(video_path=Path())
     job_dir = UPLOADS_DIR / tmp_job.id
@@ -146,7 +150,7 @@ def upload(
 
     thread = threading.Thread(
         target=run_pipeline,
-        args=(tmp_job, clip_min, clip_max),
+        args=(tmp_job,),
         daemon=True,
     )
     thread.start()

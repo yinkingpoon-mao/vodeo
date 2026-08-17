@@ -82,8 +82,6 @@ uploadBtn.addEventListener("click", async () => {
 
   const form = new FormData();
   form.append("file", selectedFile);
-  form.append("clip_min", parseFloat(el("clip-min").value) * 60);
-  form.append("clip_max", parseFloat(el("clip-max").value) * 60);
 
   showOnly("progress");
   try {
