@@ -114,7 +114,7 @@ def run_pipeline(job: Job, video_kind: str, clip_min: float, clip_max: float):
 
 
 @app.post("/api/upload")
-async def upload(
+def upload(
     file: UploadFile = File(...),
     video_kind: str = Form("一般影片"),
     clip_min: float = Form(5.0),
