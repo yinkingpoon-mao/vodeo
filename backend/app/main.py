@@ -51,7 +51,7 @@ async def basic_auth(request: Request, call_next):
 
     return Response(
         status_code=401,
-        headers={"WWW-Authenticate": 'Basic realm="剪片精華助手"'},
+        headers={"WWW-Authenticate": 'Basic realm="Video Highlights"'},
         content="需要登入",
     )
 
