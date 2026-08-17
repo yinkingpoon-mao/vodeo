@@ -76,7 +76,9 @@ def auto_max_highlights(duration: float) -> int:
     return max(3, min(12, round(duration / 90)))
 
 
-MAX_DURATION_SECONDS = float(os.environ.get("MAX_DURATION_SECONDS", 20 * 60))
+# No real cap by default (e.g. local use with plenty of RAM). Constrained
+# hosts like a small Railway plan should set MAX_DURATION_SECONDS explicitly.
+MAX_DURATION_SECONDS = float(os.environ.get("MAX_DURATION_SECONDS", 4 * 60 * 60))
 
 
 def run_pipeline(job: Job, video_kind: str, clip_min: float, clip_max: float):
