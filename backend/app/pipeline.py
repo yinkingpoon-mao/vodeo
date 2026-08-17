@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import wave
@@ -23,7 +24,8 @@ def get_whisper_model():
     if _whisper_model is None:
         from faster_whisper import WhisperModel
 
-        _whisper_model = WhisperModel("small", device="cpu", compute_type="int8")
+        model_size = os.environ.get("WHISPER_MODEL", "base")
+        _whisper_model = WhisperModel(model_size, device="cpu", compute_type="int8")
     return _whisper_model
 
 
