@@ -76,6 +76,9 @@ def auto_max_highlights(duration: float) -> int:
     return max(3, min(12, round(duration / 90)))
 
 
+MAX_DURATION_SECONDS = float(os.environ.get("MAX_DURATION_SECONDS", 20 * 60))
+
+
 def run_pipeline(job: Job, video_kind: str, clip_min: float, clip_max: float):
     try:
         job_dir = UPLOADS_DIR / job.id
@@ -84,6 +87,12 @@ def run_pipeline(job: Job, video_kind: str, clip_min: float, clip_max: float):
         job.status = "extracting_audio"
         pipeline.extract_audio(job.video_path, audio_path)
         job.duration = pipeline.get_video_duration(job.video_path)
+
+        if job.duration > MAX_DURATION_SECONDS:
+            raise RuntimeError(
+                f"呢個伺服器記憶體有限，只可以處理 {MAX_DURATION_SECONDS / 60:.0f} 分鐘以內嘅片"
+                f"（呢條片 {job.duration / 60:.1f} 分鐘）。想剪長片可以用返本機版工具。"
+            )
 
         job.status = "transcribing"
         transcript = pipeline.transcribe(audio_path)

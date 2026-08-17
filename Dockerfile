@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Bake the Whisper model into the image so the container doesn't need to
 # download it on first request (faster + more reliable cold start).
-RUN python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8')"
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('tiny', device='cpu', compute_type='int8')"
 
 COPY backend backend
 COPY frontend frontend

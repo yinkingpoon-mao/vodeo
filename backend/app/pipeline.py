@@ -24,7 +24,7 @@ def get_whisper_model():
     if _whisper_model is None:
         from faster_whisper import WhisperModel
 
-        model_size = os.environ.get("WHISPER_MODEL", "base")
+        model_size = os.environ.get("WHISPER_MODEL", "tiny")
         _whisper_model = WhisperModel(model_size, device="cpu", compute_type="int8")
     return _whisper_model
 
@@ -64,22 +64,26 @@ def transcribe(audio_path: Path) -> list[dict]:
 
 
 def find_volume_peaks(audio_path: Path, window_sec: float = 1.0, top_k: int = 25) -> list[dict]:
+    # Read + compute RMS one window at a time instead of loading the whole
+    # file into memory — otherwise peak memory scales with video length and
+    # long recordings OOM on memory-constrained hosts.
+    rms_values = []
     with wave.open(str(audio_path), "rb") as wf:
-        n_frames = wf.getnframes()
         rate = wf.getframerate()
-        raw = wf.readframes(n_frames)
+        window = max(1, int(window_sec * rate))
+        while True:
+            chunk = wf.readframes(window)
+            if not chunk:
+                break
+            arr = np.frombuffer(chunk, dtype=np.int16)
+            if arr.size < window:
+                break
+            rms_values.append(float(np.sqrt(np.mean(arr.astype(np.float64) ** 2))))
 
-    samples = np.frombuffer(raw, dtype=np.int16).astype(np.float32)
-    if samples.size == 0:
+    if not rms_values:
         return []
 
-    window = max(1, int(window_sec * rate))
-    n_windows = samples.size // window
-    if n_windows == 0:
-        return []
-
-    trimmed = samples[: n_windows * window].reshape(n_windows, window)
-    rms = np.sqrt(np.mean(trimmed ** 2, axis=1))
+    rms = np.array(rms_values)
 
     order = np.argsort(rms)[::-1]
     threshold = np.percentile(rms, 90)
