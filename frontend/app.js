@@ -113,7 +113,7 @@ async function pollJob() {
 
     if (job.status === "awaiting_review") {
       currentHighlights = job.highlights;
-      renderReview();
+      renderReview(job.warning);
       return;
     }
 
@@ -123,8 +123,15 @@ async function pollJob() {
   }
 }
 
-function renderReview() {
+function renderReview(warning) {
   showOnly("review");
+  const warningEl = el("review-warning");
+  if (warning) {
+    warningEl.textContent = warning;
+    warningEl.classList.remove("hidden");
+  } else {
+    warningEl.classList.add("hidden");
+  }
   const list = el("clip-list");
   list.innerHTML = "";
   currentHighlights.forEach((h) => {

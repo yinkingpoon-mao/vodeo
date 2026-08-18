@@ -199,3 +199,14 @@ button.dim { opacity: 0.55; }
   white-space: pre-wrap;
   margin-bottom: 12px;
 }
+
+.warning-msg {
+  background: rgba(230,180,80,0.1);
+  border: 1px solid #e6b450;
+  color: #e6b450;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: pre-wrap;
+  margin-bottom: 12px;
+}

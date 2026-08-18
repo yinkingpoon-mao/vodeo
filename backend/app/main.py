@@ -66,6 +66,7 @@ def job_public_state(job: Job) -> dict:
         "id": job.id,
         "status": job.status,
         "error": job.error,
+        "warning": job.warning,
         "duration": job.duration,
         "highlights": job.highlights,
         "has_final": job.final_path is not None and job.final_path.exists(),
@@ -112,17 +113,22 @@ def run_pipeline(job: Job):
         peaks = pipeline.find_volume_peaks(audio_path, top_k=max_highlights * 4)
 
         anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+        highlights = None
         if anthropic_key:
             job.status = "analyzing_with_ai"
-            highlights = pipeline.analyze_highlights(
-                api_key=anthropic_key,
-                transcript=transcript,
-                volume_peaks=peaks,
-                duration=job.duration,
-                max_highlights=max_highlights,
-                clip_seconds=clip_seconds,
-            )
-        else:
+            try:
+                highlights = pipeline.analyze_highlights(
+                    api_key=anthropic_key,
+                    transcript=transcript,
+                    volume_peaks=peaks,
+                    duration=job.duration,
+                    max_highlights=max_highlights,
+                    clip_seconds=clip_seconds,
+                )
+            except Exception as exc:  # noqa: BLE001
+                job.warning = f"Claude 分析失敗，已改用免費音量分析。原因: {exc}"
+
+        if highlights is None:
             job.status = "picking_highlights"
             highlights = pipeline.pick_highlights(
                 transcript=transcript,

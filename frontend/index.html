@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>剪片精華助手</title>
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 <div class="wrap">
   <h1>剪片精華助手</h1>
-  <p class="sub">上傳你嘅影片，分析對白同音量變化，揀出精華片段幫你剪成一條 reel（完全本機/免費，唔用任何收費 AI）。</p>
+  <p class="sub">上傳你嘅影片，分析對白同音量變化，揀出精華片段幫你剪成一條 reel（設咗 ANTHROPIC_API_KEY 就用 Claude 分析內容，冇設就自動用免費嘅音量分析）。</p>
 
   <section id="setup-card" class="card">
     <p class="hint">精華段數同每段長度都由程式根據片長自動決定，揀好檔案撳掣就得。</p>
@@ -32,7 +32,8 @@
 
   <section id="review-card" class="card hidden">
     <h2>揀選精華片段</h2>
-    <p class="hint">程式根據音量爆點揀咗以下片段，你可以睇下再決定要唔要邊段，然後按「合併輸出」。</p>
+    <p class="hint">你可以睇下以下片段，再決定要唔要邊段，然後按「合併輸出」。</p>
+    <p id="review-warning" class="warning-msg hidden"></p>
     <div id="clip-list"></div>
     <button id="render-btn">合併輸出精華片</button>
   </section>
@@ -55,6 +56,6 @@
     <button id="error-restart-btn">再試一次</button>
   </section>
 </div>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

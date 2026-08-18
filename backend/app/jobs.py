@@ -11,6 +11,7 @@ class Job:
     video_path: Path
     status: str = "queued"
     error: Optional[str] = None
+    warning: Optional[str] = None
     duration: float = 0.0
     highlights: list = field(default_factory=list)
     final_path: Optional[Path] = None
