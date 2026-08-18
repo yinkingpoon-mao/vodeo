@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import shutil
 import subprocess
 import wave
@@ -119,18 +120,19 @@ def pick_highlights(
     """Free, local heuristic: turn volume peaks into highlight windows.
 
     No AI call — peaks are already sorted strongest-first by find_volume_peaks'
-    caller ordering, so a simple greedy non-overlap pass is enough.
+    caller ordering, so a simple greedy non-overlap pass is enough. Each
+    highlight's length is randomized within clip_seconds so clips vary in size
+    instead of all being the same fixed duration.
     """
-    clip_len = max(clip_seconds[0], min(clip_seconds[1], (clip_seconds[0] + clip_seconds[1]) / 2))
-    lead = clip_len * 0.3
-    trail = clip_len * 0.7
-
     candidates = sorted(volume_peaks, key=lambda p: p["level"], reverse=True)
 
     chosen = []
     for peak in candidates:
         if len(chosen) >= max_highlights:
             break
+        clip_len = random.uniform(*clip_seconds)
+        lead = clip_len * 0.3
+        trail = clip_len * 0.7
         start = max(0.0, peak["time"] - lead)
         end = min(duration, peak["time"] + trail)
         if end - start < 1:

@@ -75,12 +75,13 @@ def job_public_state(job: Job) -> dict:
 
 def auto_plan(duration: float) -> tuple[int, tuple[float, float]]:
     """Aim for an 8-13 min YouTube-ready compilation regardless of source length,
-    scaling down gracefully for shorter sources."""
-    clip_range = (15.0, 40.0)
+    scaling down gracefully for shorter sources. Clip length varies per highlight
+    within clip_range rather than being a fixed size."""
+    clip_range = (30.0, 180.0)
     avg_clip = sum(clip_range) / 2
 
     target_total = min(630.0, duration * 0.6)  # 630s ~= 10.5 min, mid of 8-13
-    max_highlights = max(5, min(30, round(target_total / avg_clip)))
+    max_highlights = max(3, min(20, round(target_total / avg_clip)))
     return max_highlights, clip_range
 
 
