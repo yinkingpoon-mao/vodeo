@@ -194,6 +194,31 @@ async def get_candidate(job_id: str, index: int):
     return FileResponse(path, media_type="video/mp4")
 
 
+@app.get("/api/jobs/{job_id}/candidates.zip")
+def get_candidates_zip(job_id: str):
+    import zipfile
+
+    job = store.get(job_id)
+    if not job:
+        raise HTTPException(404, "搵唔到呢個 job")
+
+    candidates_dir = OUTPUTS_DIR / job_id / "candidates"
+    if not candidates_dir.exists():
+        raise HTTPException(404, "仲未有精華片段")
+
+    zip_path = OUTPUTS_DIR / job_id / "candidates.zip"
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_STORED) as zf:
+        for h in job.highlights:
+            src = candidates_dir / f"{h['index']}.mp4"
+            if not src.exists():
+                continue
+            label = h.get("title") or f"highlight_{h['index']}"
+            safe_label = "".join(c for c in label if c.isalnum() or c in " _-")[:40].strip() or f"highlight_{h['index']}"
+            zf.write(src, arcname=f"{h['index']:02d}_{safe_label}.mp4")
+
+    return FileResponse(zip_path, media_type="application/zip", filename=f"highlights_{job_id}.zip")
+
+
 @app.post("/api/jobs/{job_id}/render")
 async def render(job_id: str, selection: dict):
     job = store.get(job_id)

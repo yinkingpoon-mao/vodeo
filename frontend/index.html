@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>剪片精華助手</title>
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div class="wrap">
@@ -32,10 +32,11 @@
 
   <section id="review-card" class="card hidden">
     <h2>揀選精華片段</h2>
-    <p class="hint">你可以睇下以下片段，再決定要唔要邊段，然後按「合併輸出」。</p>
+    <p class="hint">你可以睇下以下片段。可以逐段下載、一次過下載晒（ZIP），或者揀返幾段合併做一條片。</p>
     <p id="review-warning" class="warning-msg hidden"></p>
+    <a id="download-all-link" class="secondary-btn" download>下載全部片段 (ZIP)</a>
     <div id="clip-list"></div>
-    <button id="render-btn">合併輸出精華片</button>
+    <button id="render-btn">合併揀選咗嘅片段做一條片</button>
   </section>
 
   <section id="render-card" class="card hidden">
@@ -56,6 +57,6 @@
     <button id="error-restart-btn">再試一次</button>
   </section>
 </div>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

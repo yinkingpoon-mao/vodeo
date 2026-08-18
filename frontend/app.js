@@ -125,6 +125,7 @@ async function pollJob() {
 
 function renderReview(warning) {
   showOnly("review");
+  el("download-all-link").href = `${API}/api/jobs/${currentJobId}/candidates.zip`;
   const warningEl = el("review-warning");
   if (warning) {
     warningEl.textContent = warning;
@@ -137,13 +138,15 @@ function renderReview(warning) {
   currentHighlights.forEach((h) => {
     const item = document.createElement("div");
     item.className = "clip-item";
+    const clipUrl = `${API}/api/jobs/${currentJobId}/candidate/${h.index}`;
     item.innerHTML = `
       <input type="checkbox" data-index="${h.index}" ${h.selected ? "checked" : ""}>
       <div class="clip-info">
         <div class="clip-title">${escapeHtml(h.title || `片段 ${h.index + 1}`)}</div>
         <div class="clip-meta">${fmtTime(h.start)} - ${fmtTime(h.end)}</div>
         <div class="clip-reason">${escapeHtml(h.reason || "")}</div>
-        <video controls preload="metadata" src="${API}/api/jobs/${currentJobId}/candidate/${h.index}"></video>
+        <video controls preload="metadata" src="${clipUrl}"></video>
+        <a class="clip-download" href="${clipUrl}" download="highlight_${h.index}.mp4">下載呢段</a>
       </div>
     `;
     list.appendChild(item);

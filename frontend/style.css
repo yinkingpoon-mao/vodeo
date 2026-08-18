@@ -169,7 +169,32 @@ button.dim { opacity: 0.55; }
 .clip-title { font-weight: 600; margin-bottom: 2px; }
 .clip-meta { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .clip-reason { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-.clip-item video { width: 100%; border-radius: 8px; max-height: 220px; background: black; }
+.clip-item video { width: 100%; border-radius: 8px; max-height: 220px; background: black; margin-bottom: 8px; }
+
+.clip-download {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--accent-2);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+.clip-download:hover { border-color: var(--accent-2); }
+
+.secondary-btn {
+  display: block;
+  text-align: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 600;
+  padding: 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+.secondary-btn:hover { border-color: var(--accent-2); }
 
 #final-video {
   width: 100%;

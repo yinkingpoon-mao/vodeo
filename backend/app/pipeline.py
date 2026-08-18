@@ -214,7 +214,7 @@ def analyze_highlights(
 - 用 return_highlights 呢個 tool 回傳結果，唔好用文字回答"""
 
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model=os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5"),
         max_tokens=2048,
         tools=[HIGHLIGHT_TOOL],
         tool_choice={"type": "tool", "name": "return_highlights"},
