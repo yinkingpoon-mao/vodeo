@@ -72,16 +72,15 @@ def job_public_state(job: Job) -> dict:
     }
 
 
-def auto_max_highlights(duration: float) -> int:
-    return max(3, min(12, round(duration / 90)))
+def auto_plan(duration: float) -> tuple[int, tuple[float, float]]:
+    """Aim for an 8-13 min YouTube-ready compilation regardless of source length,
+    scaling down gracefully for shorter sources."""
+    clip_range = (15.0, 40.0)
+    avg_clip = sum(clip_range) / 2
 
-
-def auto_clip_seconds(duration: float) -> tuple[float, float]:
-    if duration < 180:
-        return (4.0, 8.0)
-    if duration < 900:
-        return (6.0, 12.0)
-    return (8.0, 18.0)
+    target_total = min(630.0, duration * 0.6)  # 630s ~= 10.5 min, mid of 8-13
+    max_highlights = max(5, min(30, round(target_total / avg_clip)))
+    return max_highlights, clip_range
 
 
 # No real cap by default (e.g. local use with plenty of RAM). Constrained
@@ -107,8 +106,10 @@ def run_pipeline(job: Job):
         job.status = "transcribing"
         transcript = pipeline.transcribe(audio_path)
 
+        max_highlights, clip_seconds = auto_plan(job.duration)
+
         job.status = "analyzing_audio"
-        peaks = pipeline.find_volume_peaks(audio_path)
+        peaks = pipeline.find_volume_peaks(audio_path, top_k=max_highlights * 4)
 
         anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
         if anthropic_key:
@@ -118,8 +119,8 @@ def run_pipeline(job: Job):
                 transcript=transcript,
                 volume_peaks=peaks,
                 duration=job.duration,
-                max_highlights=auto_max_highlights(job.duration),
-                clip_seconds=auto_clip_seconds(job.duration),
+                max_highlights=max_highlights,
+                clip_seconds=clip_seconds,
             )
         else:
             job.status = "picking_highlights"
@@ -127,8 +128,8 @@ def run_pipeline(job: Job):
                 transcript=transcript,
                 volume_peaks=peaks,
                 duration=job.duration,
-                max_highlights=auto_max_highlights(job.duration),
-                clip_seconds=auto_clip_seconds(job.duration),
+                max_highlights=max_highlights,
+                clip_seconds=clip_seconds,
             )
 
         job.status = "cutting_previews"
